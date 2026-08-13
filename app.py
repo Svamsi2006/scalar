@@ -507,374 +507,361 @@ if "active_filesize_kb" not in st.session_state:
     st.session_state["active_filesize_kb"] = 0.0
 
 # ==============================================================================
-# 6. TABBED INTERFACE SYSTEM
+# 6. SINGLE-PAGE CONTINUOUS FLOW
 # ==============================================================================
-tab_ingest, tab_metrics, tab_audit, tab_export = st.tabs([
-    "📂 Ingest & Process", 
-    "📊 Performance Metrics", 
-    "🔍 Interactive Audit Log", 
-    "⬇️ Secure Export"
-])
 
 # ------------------------------------------------------------------------------
-# TAB 1: 📂 Ingest & Process
+# SECTION 1: 📂 Ingest & Process
 # ------------------------------------------------------------------------------
-with tab_ingest:
-    st.subheader("Ingest Word Document")
-    
-    col_upload, col_sample = st.columns([3, 1])
-    
-    with col_upload:
-        uploaded_file = st.file_uploader(
-            "Choose any Microsoft Word document (.docx)",
-            type=["docx"],
-            help="Upload standard DOCX documents containing body paragraphs, tables, headers, or footers."
-        )
-        if uploaded_file is not None:
-            file_data = uploaded_file.getvalue()
-            st.session_state["active_file_bytes"] = io.BytesIO(file_data)
-            st.session_state["active_filename"] = uploaded_file.name
-            st.session_state["active_filesize_kb"] = len(file_data) / 1024.0
-            if "use_sample" in st.session_state:
-                del st.session_state["use_sample"]
-            
-    sample_file_path = "Red Herring Prospectus.docx"
-    with col_sample:
-        st.markdown("**Quick Demo Document**")
-        if os.path.exists(sample_file_path):
-            if st.button("📄 Load Demo Prospectus", use_container_width=True):
-                st.session_state["use_sample"] = True
-                with open(sample_file_path, "rb") as f:
-                    content = f.read()
-                    st.session_state["active_file_bytes"] = io.BytesIO(content)
-                    st.session_state["active_filename"] = sample_file_path
-                    st.session_state["active_filesize_kb"] = len(content) / 1024.0
-        else:
-            st.caption("Demo sample document not found in workspace.")
-            
-    # Active Document Card display
-    if st.session_state["active_file_bytes"] is not None:
-        st.markdown(f"""
-        <div style="background-color: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 12px; padding: 1.25rem 1.5rem; margin-top: 1rem; margin-bottom: 1.5rem;">
-            <h4 style="margin-top: 0; color: #0f172a; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
-                📄 Active Document Summary
-            </h4>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 0.75rem;">
-                <div>
-                    <span style="color: #64748b; font-size: 0.8rem; font-weight: 600;">FILENAME</span><br/>
-                    <code style="font-size: 0.9rem; font-weight: 700; color: #2563eb;">{st.session_state["active_filename"]}</code>
-                </div>
-                <div>
-                    <span style="color: #64748b; font-size: 0.8rem; font-weight: 600;">FILE SIZE</span><br/>
-                    <span style="font-size: 0.9rem; font-weight: 700; color: #334155;">{st.session_state["active_filesize_kb"]:.2f} KB</span>
-                </div>
-                <div>
-                    <span style="color: #64748b; font-size: 0.8rem; font-weight: 600;">TARGET REDACTION STYLE</span><br/>
-                    <span style="font-size: 0.9rem; font-weight: 700; color: #0f172a;">{selected_mode.upper()}</span>
-                </div>
+st.markdown("## 📂 Ingest & Process")
+
+col_upload, col_sample = st.columns([3, 1])
+
+with col_upload:
+    uploaded_file = st.file_uploader(
+        "Choose any Microsoft Word document (.docx)",
+        type=["docx"],
+        help="Upload standard DOCX documents containing body paragraphs, tables, headers, or footers."
+    )
+    if uploaded_file is not None:
+        file_data = uploaded_file.getvalue()
+        st.session_state["active_file_bytes"] = io.BytesIO(file_data)
+        st.session_state["active_filename"] = uploaded_file.name
+        st.session_state["active_filesize_kb"] = len(file_data) / 1024.0
+        if "use_sample" in st.session_state:
+            del st.session_state["use_sample"]
+        
+sample_file_path = "Red Herring Prospectus.docx"
+with col_sample:
+    st.markdown("**Quick Demo Document**")
+    if os.path.exists(sample_file_path):
+        if st.button("📄 Load Demo Prospectus", use_container_width=True):
+            st.session_state["use_sample"] = True
+            with open(sample_file_path, "rb") as f:
+                content = f.read()
+                st.session_state["active_file_bytes"] = io.BytesIO(content)
+                st.session_state["active_filename"] = sample_file_path
+                st.session_state["active_filesize_kb"] = len(content) / 1024.0
+    else:
+        st.caption("Demo sample document not found in workspace.")
+        
+# Active Document Card display
+if st.session_state["active_file_bytes"] is not None:
+    st.markdown(f"""
+    <div style="background-color: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 12px; padding: 1.25rem 1.5rem; margin-top: 1rem; margin-bottom: 1.5rem;">
+        <h4 style="margin-top: 0; color: #0f172a; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+            📄 Active Document Summary
+        </h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 0.75rem;">
+            <div>
+                <span style="color: #64748b; font-size: 0.8rem; font-weight: 600;">FILENAME</span><br/>
+                <code style="font-size: 0.9rem; font-weight: 700; color: #2563eb;">{st.session_state["active_filename"]}</code>
+            </div>
+            <div>
+                <span style="color: #64748b; font-size: 0.8rem; font-weight: 600;">FILE SIZE</span><br/>
+                <span style="font-size: 0.9rem; font-weight: 700; color: #334155;">{st.session_state["active_filesize_kb"]:.2f} KB</span>
+            </div>
+            <div>
+                <span style="color: #64748b; font-size: 0.8rem; font-weight: 600;">TARGET REDACTION STYLE</span><br/>
+                <span style="font-size: 0.9rem; font-weight: 700; color: #0f172a;">{selected_mode.upper()}</span>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
+    
+    start_redaction = st.button("🚀 Run Redaction Engine", type="primary", use_container_width=True)
+    
+    if start_redaction:
+        start_time = time.time()
         
-        start_redaction = st.button("🚀 Run Redaction Engine", type="primary", use_container_width=True)
-        
-        if start_redaction:
-            start_time = time.time()
-            
-            with st.spinner("Analyzing document structure, detecting real PII, and performing format-preserving redaction..."):
-                try:
-                    # 1. Reset BytesIO stream position
-                    st.session_state["active_file_bytes"].seek(0)
+        with st.spinner("Analyzing document structure, detecting real PII, and performing format-preserving redaction..."):
+            try:
+                # 1. Reset BytesIO stream position
+                st.session_state["active_file_bytes"].seek(0)
+                
+                # 2. Instantiate core components cleanly
+                parser = DocumentParser()
+                detector = DetectionEngine(exclude_types=excluded_keys)
+                replacement_mgr = ReplacementManager(mode=selected_mode, seed=seed_value, locale=selected_locale)
+                
+                # 3. Load DOCX directly from in-memory stream
+                parser.load(st.session_state["active_file_bytes"])
+                
+                # 4. Extract all paragraphs across Body, Tables, Headers, Footers
+                paragraphs = parser.iter_all_paragraphs()
+                total_paras = len(paragraphs)
+                
+                if total_paras == 0:
+                    st.warning("⚠️ The uploaded document contains no readable text paragraphs.")
+                    st.stop()
+                
+                # 5. Execute Run-Splitting Redaction with real-time progress
+                progress_bar = st.progress(0, text="Parsing document loops...")
+                
+                for idx, paragraph in enumerate(paragraphs, start=1):
+                    full_para_text = extract_full_text(paragraph)
                     
-                    # 2. Instantiate core components cleanly
-                    parser = DocumentParser()
-                    detector = DetectionEngine(exclude_types=excluded_keys)
-                    replacement_mgr = ReplacementManager(mode=selected_mode, seed=seed_value, locale=selected_locale)
-                    
-                    # 3. Load DOCX directly from in-memory stream
-                    parser.load(st.session_state["active_file_bytes"])
-                    
-                    # 4. Extract all paragraphs across Body, Tables, Headers, Footers
-                    paragraphs = parser.iter_all_paragraphs()
-                    total_paras = len(paragraphs)
-                    
-                    if total_paras == 0:
-                        st.warning("⚠️ The uploaded document contains no readable text paragraphs.")
-                        st.stop()
-                    
-                    # 5. Execute Run-Splitting Redaction with real-time progress
-                    progress_bar = st.progress(0, text="Parsing document loops...")
-                    
-                    for idx, paragraph in enumerate(paragraphs, start=1):
-                        full_para_text = extract_full_text(paragraph)
-                        
-                        if full_para_text.strip():
-                            if idx % 3 == 0:
-                                progress_text = f"Evaluating Named Entities... Elements: {idx}/{total_paras}"
-                            elif idx % 3 == 1:
-                                progress_text = f"Replacing formatting runs... Elements: {idx}/{total_paras}"
-                            else:
-                                progress_text = f"Scanning paragraph blocks... Elements: {idx}/{total_paras}"
-                            
-                            detections = detector.detect_pii(full_para_text)
-                            if detections:
-                                parser.process_paragraph(paragraph, detections, replacement_mgr)
+                    if full_para_text.strip():
+                        if idx % 3 == 0:
+                            progress_text = f"Evaluating Named Entities... Elements: {idx}/{total_paras}"
+                        elif idx % 3 == 1:
+                            progress_text = f"Replacing formatting runs... Elements: {idx}/{total_paras}"
                         else:
                             progress_text = f"Scanning paragraph blocks... Elements: {idx}/{total_paras}"
                         
-                        if idx % 25 == 0 or idx == total_paras:
-                            pct = idx / total_paras
-                            progress_bar.progress(pct, text=progress_text)
+                        detections = detector.detect_pii(full_para_text)
+                        if detections:
+                            parser.process_paragraph(paragraph, detections, replacement_mgr)
+                    else:
+                        progress_text = f"Scanning paragraph blocks... Elements: {idx}/{total_paras}"
                     
-                    # 6. Save modified document directly to an in-memory BytesIO buffer
-                    output_docx_bytes = io.BytesIO()
-                    parser.save(output_docx_bytes)
-                    output_docx_bytes.seek(0)
-                    
-                    processed_bytes_data = output_docx_bytes.getvalue()
-                    elapsed_time = time.time() - start_time
-                    progress_bar.empty()
-                    
-                    # Sanitize output filename to prevent browser download GUID issues
-                    base_name = os.path.splitext(st.session_state["active_filename"])[0]
-                    safe_name = re.sub(r'[^a-zA-Z0-9_\-]', '_', base_name)
-                    safe_name = re.sub(r'_+', '_', safe_name).strip('_')
-                    if not safe_name:
-                        safe_name = "document"
-                    clean_output_filename = f"{safe_name}_redacted.docx"
-                    
-                    # Store results in session state for stateful rendering
-                    st.session_state["redaction_results"] = {
-                        "processed_bytes": processed_bytes_data,
-                        "filename": st.session_state["active_filename"],
-                        "clean_output_filename": clean_output_filename,
-                        "elapsed_time": elapsed_time,
-                        "parser_stats": parser.get_stats(),
-                        "manager_stats": replacement_mgr.get_stats(),
-                        "audit_report": replacement_mgr.get_report(),
-                        "total_paras": total_paras,
-                        "mode": selected_mode
-                    }
-                    
-                    st.success("🎉 Redaction engine execution complete! Switch to the other tabs to view metrics, log audits, or download the redacted document.")
-                    
-                except Exception as e:
-                    logger.exception(f"Unexpected error during redaction: {e}")
-                    st.error(f"❌ An error occurred during document redaction: {str(e)}")
-                    st.info("💡 Tip: Verify that the document is a valid Microsoft Word .docx file.")
-    else:
-        st.info("💡 Upload any Word document (.docx) or click 'Load Demo Prospectus' above to begin.")
+                    if idx % 25 == 0 or idx == total_paras:
+                        pct = idx / total_paras
+                        progress_bar.progress(pct, text=progress_text)
+                
+                # 6. Save modified document directly to an in-memory BytesIO buffer
+                output_docx_bytes = io.BytesIO()
+                parser.save(output_docx_bytes)
+                output_docx_bytes.seek(0)
+                
+                processed_bytes_data = output_docx_bytes.getvalue()
+                elapsed_time = time.time() - start_time
+                progress_bar.empty()
+                
+                # Sanitize output filename to prevent browser download GUID issues
+                base_name = os.path.splitext(st.session_state["active_filename"])[0]
+                safe_name = re.sub(r'[^a-zA-Z0-9_\-]', '_', base_name)
+                safe_name = re.sub(r'_+', '_', safe_name).strip('_')
+                if not safe_name:
+                    safe_name = "document"
+                clean_output_filename = f"{safe_name}_redacted.docx"
+                
+                # Store results in session state for stateful rendering
+                st.session_state["redaction_results"] = {
+                    "processed_bytes": processed_bytes_data,
+                    "filename": st.session_state["active_filename"],
+                    "clean_output_filename": clean_output_filename,
+                    "elapsed_time": elapsed_time,
+                    "parser_stats": parser.get_stats(),
+                    "manager_stats": replacement_mgr.get_stats(),
+                    "audit_report": replacement_mgr.get_report(),
+                    "total_paras": total_paras,
+                    "mode": selected_mode
+                }
+                
+                st.success("🎉 Redaction engine execution complete! Scroll down to view the performance metrics, entity audit mapping, and secure export panel.")
+                
+            except Exception as e:
+                logger.exception(f"Unexpected error during redaction: {e}")
+                st.error(f"❌ An error occurred during document redaction: {str(e)}")
+                st.info("💡 Tip: Verify that the document is a valid Microsoft Word .docx file.")
+else:
+    st.info("💡 Upload any Word document (.docx) or click 'Load Demo Prospectus' above to begin.")
 
 # ------------------------------------------------------------------------------
-# TAB 2: 📊 Performance Metrics
+# SECTION 2: 📊 Performance Metrics
 # ------------------------------------------------------------------------------
-with tab_metrics:
-    st.subheader("Performance Metrics & Diagnostics")
+if st.session_state["redaction_results"] is not None:
+    st.divider()
+    st.markdown("## 📊 Performance Metrics")
     
-    if st.session_state["redaction_results"] is None:
-        st.info("📊 Please run the Redaction Engine in the Ingest tab to view analytics.")
-    else:
-        results = st.session_state["redaction_results"]
-        manager_stats: Dict[str, int] = results["manager_stats"]
-        parser_stats: Dict[str, int] = results["parser_stats"]
-        audit_report: Dict[str, Dict[str, str]] = results["audit_report"]
-        total_replacements = parser_stats.get("replacements_made", 0)
-        total_paras = results["total_paras"]
-        elapsed_time = results["elapsed_time"]
-        
-        # Success Banner
-        st.markdown(f"""
-        <div class="success-banner">
-            <span style="font-size: 1.5rem;">🎉</span>
-            <div>
-                <div style="font-weight: 700; font-size: 1.1rem;">Anonymization Metrics Ready!</div>
-                <div style="font-size: 0.9rem; color: #047857;">
-                    Processed <strong>{total_paras:,}</strong> document elements and executed <strong>{total_replacements:,}</strong> redactions in <strong>{elapsed_time:.2f}s</strong>.
-                </div>
+    results = st.session_state["redaction_results"]
+    manager_stats: Dict[str, int] = results["manager_stats"]
+    parser_stats: Dict[str, int] = results["parser_stats"]
+    audit_report: Dict[str, Dict[str, str]] = results["audit_report"]
+    total_replacements = parser_stats.get("replacements_made", 0)
+    total_paras = results["total_paras"]
+    elapsed_time = results["elapsed_time"]
+    
+    # Success Banner
+    st.markdown(f"""
+    <div class="success-banner">
+        <span style="font-size: 1.5rem;">🎉</span>
+        <div>
+            <div style="font-weight: 700; font-size: 1.1rem;">Anonymization Metrics Ready!</div>
+            <div style="font-size: 0.9rem; color: #047857;">
+                Processed <strong>{total_paras:,}</strong> document elements and executed <strong>{total_replacements:,}</strong> redactions in <strong>{elapsed_time:.2f}s</strong>.
             </div>
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Summary KPI Metric Cards
+    st.markdown("### Executive Summary")
+    kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+    
+    with kpi1:
+        st.metric(
+            label="Elements Processed",
+            value=f"{total_paras:,}",
+            help="Total body paragraphs, table cells, headers, and footers scanned."
+        )
+    with kpi2:
+        st.metric(
+            label="Total Redactions Made",
+            value=f"{total_replacements:,}",
+            help="Total PII instances replaced with compliance redaction tags."
+        )
+    with kpi3:
+        unique_entities = sum(len(v) for v in audit_report.values())
+        st.metric(
+            label="Unique PII Entities Mapped",
+            value=f"{unique_entities:,}",
+            help="Number of distinct real PII values identified and mapped."
+        )
+    with kpi4:
+        st.metric(
+            label="Processing Speed",
+            value=f"{total_paras / max(elapsed_time, 0.01):.0f} elem/sec",
+            delta=f"{elapsed_time:.2f}s elapsed"
+        )
         
-        # Summary KPI Metric Cards
-        st.markdown("### Executive Summary")
-        kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+    st.divider()
+    
+    # Category Breakdown and Bar Chart
+    st.markdown("### Redactions by PII Category")
+    if manager_stats:
+        cat_cols = st.columns(min(len(manager_stats), 4))
+        for i, (cat_key, count) in enumerate(manager_stats.items()):
+            col = cat_cols[i % len(cat_cols)]
+            meta = CATEGORY_DEFINITIONS.get(cat_key, {"label": cat_key, "icon": "🏷️"})
+            col.metric(label=f"{meta['icon']} {meta['label']}", value=count)
         
-        with kpi1:
-            st.metric(
-                label="Elements Processed",
-                value=f"{total_paras:,}",
-                help="Total body paragraphs, table cells, headers, and footers scanned."
-            )
-        with kpi2:
-            st.metric(
-                label="Total Redactions Made",
-                value=f"{total_replacements:,}",
-                help="Total PII instances replaced with compliance redaction tags."
-            )
-        with kpi3:
-            unique_entities = sum(len(v) for v in audit_report.values())
-            st.metric(
-                label="Unique PII Entities Mapped",
-                value=f"{unique_entities:,}",
-                help="Number of distinct real PII values identified and mapped."
-            )
-        with kpi4:
-            st.metric(
-                label="Processing Speed",
-                value=f"{total_paras / max(elapsed_time, 0.01):.0f} elem/sec",
-                delta=f"{elapsed_time:.2f}s elapsed"
-            )
-            
-        st.divider()
+        st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
         
-        # Category Breakdown and Bar Chart
-        st.markdown("### Redactions by PII Category")
-        if manager_stats:
-            cat_cols = st.columns(min(len(manager_stats), 4))
-            for i, (cat_key, count) in enumerate(manager_stats.items()):
-                col = cat_cols[i % len(cat_cols)]
-                meta = CATEGORY_DEFINITIONS.get(cat_key, {"label": cat_key, "icon": "🏷️"})
-                col.metric(label=f"{meta['icon']} {meta['label']}", value=count)
-            
-            st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
-            
-            chart_data = []
-            for cat_key, count in manager_stats.items():
-                meta = CATEGORY_DEFINITIONS.get(cat_key, {"label": cat_key, "icon": "🏷️"})
-                chart_data.append({
-                    "PII Category": f"{meta['icon']} {meta['label']}",
-                    "Unique Entities Redacted": count
-                })
-            df_chart = pd.DataFrame(chart_data)
-            st.bar_chart(df_chart.set_index("PII Category"), color="#2563eb", use_container_width=True)
-        else:
-            st.info("ℹ️ No sensitive PII entities were detected in this document based on your active filter criteria.")
+        chart_data = []
+        for cat_key, count in manager_stats.items():
+            meta = CATEGORY_DEFINITIONS.get(cat_key, {"label": cat_key, "icon": "🏷️"})
+            chart_data.append({
+                "PII Category": f"{meta['icon']} {meta['label']}",
+                "Unique Entities Redacted": count
+            })
+        df_chart = pd.DataFrame(chart_data)
+        st.bar_chart(df_chart.set_index("PII Category"), color="#2563eb", use_container_width=True)
+    else:
+        st.info("ℹ️ No sensitive PII entities were detected in this document based on your active filter criteria.")
 
 # ------------------------------------------------------------------------------
-# TAB 3: 🔍 Interactive Audit Log
+# SECTION 3: 🔍 Interactive Audit Log
 # ------------------------------------------------------------------------------
-with tab_audit:
-    st.subheader("Interactive Audit Log")
+if st.session_state["redaction_results"] is not None:
+    st.divider()
+    st.markdown("## 🔍 Interactive Audit Log")
     
-    if st.session_state["redaction_results"] is None:
-        st.info("🔍 Please run the Redaction Engine in the Ingest tab to view the audit log.")
+    results = st.session_state["redaction_results"]
+    audit_report: Dict[str, Dict[str, str]] = results["audit_report"]
+    clean_out_filename = results["clean_output_filename"]
+    
+    st.caption("Review the exact mapping between real sensitive data found in the document and the applied redaction.")
+    
+    audit_rows: List[Dict[str, str]] = []
+    for cat_key, mapping in audit_report.items():
+        meta = CATEGORY_DEFINITIONS.get(cat_key, {"label": cat_key, "icon": "🏷️"})
+        for real_val, fake_val in mapping.items():
+            audit_rows.append({
+                "Category": f"{meta['icon']} {meta['label']}",
+                "Original Sensitive Value": real_val,
+                "Redaction / Replacement Applied": fake_val
+            })
+    
+    if audit_rows:
+        df_audit = pd.DataFrame(audit_rows)
+        
+        search_query = st.text_input("🔍 Search translation table (type any name, company, email...)", "")
+        if search_query:
+            mask = df_audit.apply(lambda row: row.astype(str).str.contains(search_query, case=False).any(), axis=1)
+            filtered_df = df_audit[mask]
+        else:
+            filtered_df = df_audit
+            
+        st.dataframe(filtered_df, use_container_width=True, height=365)
     else:
-        results = st.session_state["redaction_results"]
-        audit_report: Dict[str, Dict[str, str]] = results["audit_report"]
-        clean_out_filename = results["clean_output_filename"]
+        st.info("No PII mappings were generated.")
+
+# ------------------------------------------------------------------------------
+# SECTION 4: ⬇️ Secure Export
+# ------------------------------------------------------------------------------
+if st.session_state["redaction_results"] is not None:
+    st.divider()
+    st.markdown("## ⬇️ Secure Export")
+    
+    results = st.session_state["redaction_results"]
+    clean_out_filename = results["clean_output_filename"]
+    processed_bytes = results["processed_bytes"]
+    audit_report = results["audit_report"]
+    
+    # Highlight-Bordered Card
+    st.markdown(f"""
+    <div class="export-card">
+        <span style="font-size: 3rem;">🔒</span>
+        <h3 style="margin-top: 1rem; color: #0f172a; font-weight: 800;">Export Anonymized Output</h3>
+        <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 2rem; line-height: 1.5;">
+            Your redacted file is ready. The document has been processed in-memory with zero local disk logging. Choose a secure download method below:
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Center-positioned columns for download buttons
+    col_down1, col_down2 = st.columns(2)
+    
+    with col_down1:
+        st.markdown("<div style='text-align: center; font-weight: 700; margin-bottom: 0.5rem;'>📄 Anonymized Document</div>", unsafe_allow_html=True)
         
-        st.caption("Review the exact mapping between real sensitive data found in the document and the applied redaction.")
+        # 1. Direct Base64 Instant Download Link (100% immune to browser GUID issues)
+        b64_docx = base64.b64encode(processed_bytes).decode()
+        direct_download_html = f'''
+        <a href="data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,{b64_docx}" 
+           download="{clean_out_filename}" 
+           class="direct-download-btn">
+           📥 Click to Download {clean_out_filename}
+        </a>
+        '''
+        st.markdown(direct_download_html, unsafe_allow_html=True)
         
-        audit_rows: List[Dict[str, str]] = []
+        # 2. Standard Streamlit Download Button (with sanitized filename)
+        st.download_button(
+            label=f"💾 Alternative Download ({clean_out_filename})",
+            data=processed_bytes,
+            file_name=clean_out_filename,
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            use_container_width=True
+        )
+        
+    with col_down2:
+        st.markdown("<div style='text-align: center; font-weight: 700; margin-bottom: 0.5rem;'>📥 Mapping Logs</div>", unsafe_allow_html=True)
+        
+        # Form audit table records
+        audit_rows_logs = []
         for cat_key, mapping in audit_report.items():
             meta = CATEGORY_DEFINITIONS.get(cat_key, {"label": cat_key, "icon": "🏷️"})
             for real_val, fake_val in mapping.items():
-                audit_rows.append({
+                audit_rows_logs.append({
                     "Category": f"{meta['icon']} {meta['label']}",
                     "Original Sensitive Value": real_val,
                     "Redaction / Replacement Applied": fake_val
                 })
         
-        if audit_rows:
-            df_audit = pd.DataFrame(audit_rows)
-            
-            search_query = st.text_input("🔍 Search translation table (type any name, company, email...)", "")
-            if search_query:
-                mask = df_audit.apply(lambda row: row.astype(str).str.contains(search_query, case=False).any(), axis=1)
-                filtered_df = df_audit[mask]
-            else:
-                filtered_df = df_audit
-                
-            st.dataframe(filtered_df, use_container_width=True, height=365)
-        else:
-            st.info("No PII mappings were generated.")
-
-# ------------------------------------------------------------------------------
-# TAB 4: ⬇️ Secure Export
-# ------------------------------------------------------------------------------
-with tab_export:
-    st.subheader("Secure Export Panel")
-    
-    if st.session_state["redaction_results"] is None:
-        st.info("⬇️ Please run the Redaction Engine in the Ingest tab to unlock secure download options.")
-    else:
-        results = st.session_state["redaction_results"]
-        clean_out_filename = results["clean_output_filename"]
-        processed_bytes = results["processed_bytes"]
-        audit_report = results["audit_report"]
+        df_audit_logs = pd.DataFrame(audit_rows_logs)
         
-        # Highlight-Bordered Card
-        st.markdown(f"""
-        <div class="export-card">
-            <span style="font-size: 3rem;">🔒</span>
-            <h3 style="margin-top: 1rem; color: #0f172a; font-weight: 800;">Export Anonymized Output</h3>
-            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 2rem; line-height: 1.5;">
-                Your redacted file is ready. The document has been processed in-memory with zero local disk logging. Choose a secure download method below:
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+        # CSV Download Button
+        csv_data = df_audit_logs.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Download Audit Log (CSV)",
+            data=csv_data,
+            file_name=f"{os.path.splitext(clean_out_filename)[0]}_audit_log.csv",
+            mime="text/csv",
+            use_container_width=True
+        )
         
-        # Center-positioned columns for download buttons
-        col_down1, col_down2 = st.columns(2)
-        
-        with col_down1:
-            st.markdown("<div style='text-align: center; font-weight: 700; margin-bottom: 0.5rem;'>📄 Anonymized Document</div>", unsafe_allow_html=True)
-            
-            # 1. Direct Base64 Instant Download Link (100% immune to browser GUID issues)
-            b64_docx = base64.b64encode(processed_bytes).decode()
-            direct_download_html = f'''
-            <a href="data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,{b64_docx}" 
-               download="{clean_out_filename}" 
-               class="direct-download-btn">
-               📥 Click to Download {clean_out_filename}
-            </a>
-            '''
-            st.markdown(direct_download_html, unsafe_allow_html=True)
-            
-            # 2. Standard Streamlit Download Button (with sanitized filename)
-            st.download_button(
-                label=f"💾 Alternative Download ({clean_out_filename})",
-                data=processed_bytes,
-                file_name=clean_out_filename,
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                use_container_width=True
-            )
-            
-        with col_down2:
-            st.markdown("<div style='text-align: center; font-weight: 700; margin-bottom: 0.5rem;'>📥 Mapping Logs</div>", unsafe_allow_html=True)
-            
-            # Form audit table records
-            audit_rows_logs = []
-            for cat_key, mapping in audit_report.items():
-                meta = CATEGORY_DEFINITIONS.get(cat_key, {"label": cat_key, "icon": "🏷️"})
-                for real_val, fake_val in mapping.items():
-                    audit_rows_logs.append({
-                        "Category": f"{meta['icon']} {meta['label']}",
-                        "Original Sensitive Value": real_val,
-                        "Redaction / Replacement Applied": fake_val
-                    })
-            
-            df_audit_logs = pd.DataFrame(audit_rows_logs)
-            
-            # CSV Download Button
-            csv_data = df_audit_logs.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="📥 Download Audit Log (CSV)",
-                data=csv_data,
-                file_name=f"{os.path.splitext(clean_out_filename)[0]}_audit_log.csv",
-                mime="text/csv",
-                use_container_width=True
-            )
-            
-            # JSON Download Button
-            json_data = json.dumps(audit_report, indent=2).encode('utf-8')
-            st.download_button(
-                label="📥 Download Entity Map (JSON)",
-                data=json_data,
-                file_name=f"{os.path.splitext(clean_out_filename)[0]}_entity_map.json",
-                mime="application/json",
-                use_container_width=True
-            )
+        # JSON Download Button
+        json_data = json.dumps(audit_report, indent=2).encode('utf-8')
+        st.download_button(
+            label="📥 Download Entity Map (JSON)",
+            data=json_data,
+            file_name=f"{os.path.splitext(clean_out_filename)[0]}_entity_map.json",
+            mime="application/json",
+            use_container_width=True
+        )
 
 # Footer
 st.markdown("<div style='height: 2.5rem;'></div>", unsafe_allow_html=True)

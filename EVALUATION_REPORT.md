@@ -18,11 +18,11 @@ The tool was evaluated using a **controlled test corpus** containing exactly **3
 
 | PII Category     | TP | FP | FN | Precision (%) | Recall (%) | Accuracy (%) |
 |---|---|---|---|---|---|---|
-| Full Names       | 5  | 0  | 0  | 100.00%        | 100.00%    | 100.00%      |
+| Full Names       | 5  | 3  | 0  | 62.50%         | 100.00%    | 98.47%       |
 | Emails           | 4  | 0  | 0  | 100.00%        | 100.00%    | 100.00%      |
 | Phone Numbers    | 4  | 0  | 0  | 100.00%        | 100.00%    | 100.00%      |
-| Companies        | 4  | 2  | 0  | 66.67%         | 100.00%    | 98.88%       |
-| Addresses        | 2  | 2  | 1  | 50.00%         | 66.67%     | 98.32%       |
+| Companies        | 4  | 4  | 0  | 50.00%         | 100.00%    | 97.96%       |
+| Addresses        | 2  | 2  | 1  | 50.00%         | 66.67%     | 98.47%       |
 | SSNs             | 2  | 0  | 0  | 100.00%        | 100.00%    | 100.00%      |
 | Credit Cards     | 2  | 0  | 0  | 100.00%        | 100.00%    | 100.00%      |
 | Dates            | 4  | 0  | 0  | 100.00%        | 100.00%    | 100.00%      |
@@ -31,7 +31,7 @@ The tool was evaluated using a **controlled test corpus** containing exactly **3
 | PANs             | 1  | 0  | 0  | 100.00%        | 100.00%    | 100.00%      |
 | GSTINs           | 1  | 0  | 0  | 100.00%        | 100.00%    | 100.00%      |
 | Aadhaars         | 1  | 0  | 0  | 100.00%        | 100.00%    | 100.00%      |
-| **OVERALL**      | **33** | **6** | **1** | **84.62%** | **97.06%** | **99.73%** |
+| **OVERALL**      | **33** | **9** | **1** | **78.57%** | **97.06%** | **99.61%** |
 
 ---
 
@@ -43,15 +43,16 @@ The system catches nearly all PII instances. The single False Negative was a **c
 
 **Why this happens:** NER models treat addresses as composites of multiple entity types (street names, cities, states), and our matching requires the full address text to be covered. In practice, partial redaction still removes the most identifying portions.
 
-### Precision: 84.62%
+### Precision: 78.57%
 
-The 6 False Positives break down as:
+The 9 False Positives break down as:
+- **3 Full Name FPs:** Single capitalized words adjacent to titles flagged as PERSON entities by spaCy NER (relaxed to capture single names like Vamsi).
 - **4 Company FPs:** spaCy tagged contextual phrases like "HR" abbreviations or descriptive terms adjacent to real company names as ORG entities.
 - **2 Address FPs:** Location names used in generic context (e.g., standalone city names like "Pune", "London") were tagged as addresses when they appeared outside of actual address strings.
 
 **Why this is acceptable:** In a security-critical application, higher recall (catching more PII) is preferred over higher precision (fewer false redactions). False positives mean we redact slightly more than necessary, which is the safer error mode.
 
-### Accuracy: 99.73%
+### Accuracy: 99.61%
 
 The extremely high accuracy reflects the fact that PII entities are sparse relative to the total text — most words are correctly identified as non-PII (True Negatives).
 

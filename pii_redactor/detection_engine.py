@@ -85,8 +85,10 @@ class DetectionEngine:
                 value = ent.text
 
                 if ent.label_ == 'PERSON':
-                    if len(value) >= 2 and len(value.split()) >= 2:
-                        entity_type = 'FULL_NAME'
+                    if len(value) >= 2:
+                        fps = {"board", "chairman", "director", "manager", "secretary", "president", "treasurer", "meeting", "committee"}
+                        if value.lower().strip() not in fps:
+                            entity_type = 'FULL_NAME'
                 elif ent.label_ == 'ORG':
                     if len(value) >= 2:
                         entity_type = 'COMPANY'
