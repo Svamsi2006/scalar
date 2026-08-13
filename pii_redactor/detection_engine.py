@@ -1,5 +1,7 @@
 import re
 import spacy
+import subprocess
+import sys
 from typing import List, Dict, Set, Optional
 
 class DetectionEngine:
@@ -7,15 +9,14 @@ class DetectionEngine:
         self.exclude_types = exclude_types or set()
         
         try:
-            self.nlp = spacy.load('en_core_web_sm')
+            self.nlp = spacy.load("en_core_web_sm")
         except OSError:
-            print("spaCy model 'en_core_web_sm' not found. Attempting to download...")
+            # This runs silently on Streamlit Cloud to download the model on startup
+            subprocess.run([sys.executable, "-m", "spacy", "download", "en_core_web_sm"])
             try:
-                from spacy.cli import download
-                download('en_core_web_sm')
-                self.nlp = spacy.load('en_core_web_sm')
-            except Exception as download_err:
-                print(f"Error downloading spaCy model: {download_err}")
+                self.nlp = spacy.load("en_core_web_sm")
+            except Exception as e:
+                print(f"Error loading downloaded spaCy model: {e}")
                 self.nlp = None
             
         if self.nlp:
