@@ -11,11 +11,11 @@ logger = logging.getLogger(__name__)
 class PiiRedactor:
     """Orchestrator class that ties together parsing, detection, and replacement."""
 
-    def __init__(self, exclude_types: Optional[Set[str]] = None, seed: int = 42):
+    def __init__(self, exclude_types: Optional[Set[str]] = None, seed: int = 42, mode: str = 'token'):
         self.exclude_types = exclude_types or set()
         self.parser = DocumentParser()
         self.engine = DetectionEngine(exclude_types=self.exclude_types)
-        self.manager = ReplacementManager(seed=seed)
+        self.manager = ReplacementManager(mode=mode, seed=seed)
 
     def process(self, input_path: str, output_path: str) -> None:
         """
@@ -79,6 +79,13 @@ def main() -> None:
         "-s", "--seed", help="Faker seed", type=int, default=42
     )
     parser.add_argument(
+        "-m",
+        "--mode",
+        help="Redaction mode: token, mask, blackout, synthetic",
+        type=str,
+        default="token",
+    )
+    parser.add_argument(
         "-v", "--verbose", help="Enable DEBUG logging", action="store_true"
     )
 
@@ -113,7 +120,7 @@ def main() -> None:
                 logger.warning(f"Unknown PII type to exclude: {t}")
 
     # Initialize and run redactor
-    redactor = PiiRedactor(exclude_types=exclude_types, seed=args.seed)
+    redactor = PiiRedactor(exclude_types=exclude_types, seed=args.seed, mode=args.mode)
     redactor.process(args.input, args.output)
     redactor.print_summary()
     
