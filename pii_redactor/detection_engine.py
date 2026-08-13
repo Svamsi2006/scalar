@@ -129,7 +129,13 @@ class DetectionEngine:
                 current_len = current['end_char'] - current['start_char']
                 nxt_len = nxt['end_char'] - nxt['start_char']
                 
-                if current_len > nxt_len:
+                # Priority rules: Prioritize statutory IDs over generic patterns (like PHONE or DATE)
+                priority_types = {'AADHAAR', 'CIN', 'PAN', 'GSTIN', 'SSN', 'CREDIT_CARD'}
+                if current['entity_type'] in priority_types and nxt['entity_type'] not in priority_types:
+                    pass  # Keep current
+                elif nxt['entity_type'] in priority_types and current['entity_type'] not in priority_types:
+                    current = nxt  # Keep next
+                elif current_len > nxt_len:
                     pass  # Keep current
                 elif nxt_len > current_len:
                     current = nxt  # Keep next
