@@ -56,10 +56,10 @@ This report provides a detailed files-by-files structural audit, QA review, and 
   - `spacy>=3.7.0`
   - `faker>=20.0.0`
   - `pandas>=1.4.0`
-- **Why we removed the raw wheel URL:**
-  - In newer `pip` releases, declaring a raw wheel URL (like `https://github.com/explosion/spacy-models/...`) without a package name description (e.g. `package @ url`) causes package installation failures.
-  - Hardcoded model versions cause installation failures if the host platform runs a newer version of spaCy.
-  - Relying on python-level auto-download is highly portable and has a 100% success rate on Streamlit Cloud.
+- **Why we use PEP 508 Direct Reference for spaCy model:**
+  - Declaring a raw wheel URL (like `https://github.com/.../en_core_web_sm.whl`) without a package name description (e.g. `package @ url`) causes modern `pip` versions to fail.
+  - Attempting to dynamically download and write the spaCy model to the system package directory (`site-packages`) at runtime results in `[Errno 13] Permission denied` errors on Streamlit Community Cloud due to read-only container file system permissions.
+  - Adding the model using PEP 508 format (`en_core_web_sm @ https://github.com/explosion/...`) instructs Streamlit's build container to install the package at build time (with root permission) so that it is pre-loaded and accessible read-only at runtime.
 
 ---
 
