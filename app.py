@@ -31,6 +31,22 @@ logging.basicConfig(
 )
 logger = logging.getLogger("pii_redactor.app")
 
+@st.cache_resource
+def load_spacy_model():
+    import spacy
+    import subprocess
+    import sys
+    try:
+        return spacy.load("en_core_web_sm")
+    except OSError:
+        logger.info("spaCy model 'en_core_web_sm' not found. Attempting dynamic download...")
+        subprocess.run([sys.executable, "-m", "spacy", "download", "en_core_web_sm"])
+        try:
+            return spacy.load("en_core_web_sm")
+        except Exception as e:
+            logger.error(f"Failed to load spaCy model after download: {e}")
+            raise e
+
 # ==============================================================================
 # 1. PAGE CONFIGURATION & THEME STYLING
 # ==============================================================================
@@ -264,6 +280,26 @@ CATEGORY_DEFINITIONS = {
         "label": "IP Addresses",
         "icon": "🌐",
         "description": "IPv4 network addresses and host indicators"
+    },
+    "CIN": {
+        "label": "Corporate Identity Numbers (CIN)",
+        "icon": "🏢",
+        "description": "Indian Corporate Identity Numbers"
+    },
+    "PAN": {
+        "label": "Permanent Account Numbers (PAN)",
+        "icon": "🪪",
+        "description": "Indian Income Tax Permanent Account Numbers"
+    },
+    "GSTIN": {
+        "label": "GSTIN",
+        "icon": "📜",
+        "description": "Indian Goods and Services Tax Identification Numbers"
+    },
+    "AADHAAR": {
+        "label": "Aadhaar Numbers",
+        "icon": "👤",
+        "description": "12-digit Indian national identity numbers"
     }
 }
 
@@ -349,8 +385,7 @@ with st.sidebar:
     # Engine Health & Diagnostics
     st.markdown("### 🔍 Engine Diagnostics")
     try:
-        import spacy
-        nlp_test = spacy.load("en_core_web_sm")
+        nlp_test = load_spacy_model()
         st.success("✅ spaCy NER Model: `en_core_web_sm` loaded", icon="🤖")
     except Exception:
         st.warning("⚠️ spaCy Model unavailable. Using Regex-only mode.", icon="⚡")

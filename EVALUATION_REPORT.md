@@ -27,19 +27,23 @@ The tool was evaluated using a **controlled test corpus** containing exactly **3
 | Credit Cards     | 2  | 0  | 0  | 100.00%        | 100.00%    | 100.00%      |
 | Dates            | 4  | 0  | 0  | 100.00%        | 100.00%    | 100.00%      |
 | IP Addresses     | 2  | 0  | 0  | 100.00%        | 100.00%    | 100.00%      |
-| **OVERALL**      | **29** | **4** | **1** | **87.88%** | **96.67%** | **99.69%** |
+| CINs             | 1  | 0  | 0  | 100.00%        | 100.00%    | 100.00%      |
+| PANs             | 1  | 0  | 0  | 100.00%        | 100.00%    | 100.00%      |
+| GSTINs           | 1  | 0  | 0  | 100.00%        | 100.00%    | 100.00%      |
+| Aadhaars         | 1  | 0  | 0  | 100.00%        | 100.00%    | 100.00%      |
+| **OVERALL**      | **33** | **4** | **1** | **89.19%** | **97.06%** | **99.70%** |
 
 ---
 
 ## Metric Interpretations & Key Insights
 
-### Recall: 96.67%
+### Recall: 97.06%
 
 The system catches nearly all PII instances. The single False Negative was a **complex multi-line address** (`1600 Pennsylvania Avenue NW, Washington DC 20500`) — the spaCy `en_core_web_sm` model recognized parts of it (e.g., "Washington DC") as `GPE` but did not capture the full street-level address as a single entity.
 
 **Why this happens:** NER models treat addresses as composites of multiple entity types (street names, cities, states), and our matching requires the full address text to be covered. In practice, partial redaction still removes the most identifying portions.
 
-### Precision: 87.88%
+### Precision: 89.19%
 
 The 4 False Positives break down as:
 - **2 Company FPs:** spaCy tagged contextual phrases like "HR" abbreviations or descriptive terms adjacent to real company names as ORG entities.

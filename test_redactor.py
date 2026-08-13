@@ -17,6 +17,7 @@ All documents were sent to the secondary office located at 42 Baker Street, Lond
 The HR department successfully processed the records for employees with identifiers 123-45-6789 and 987-65-4321 on 22-Jan-1985.
 Recent payments were completed using cards 4532 1234 5678 9012 and 5425-2334-3010-9903 on 2024-06-15.
 System logs indicate access from 192.168.1.1 and 10.0.0.255 during these transactions.
+The Indian statutory ID numbers are CIN: U28129PN1979PLC141032, PAN: ABCDE1234F, GSTIN: 27ABCDE1234F1Z5, and Aadhaar: 1234 5678 9012.
     """
 
     ground_truth = [
@@ -58,7 +59,12 @@ System logs indicate access from 192.168.1.1 and 10.0.0.255 during these transac
         {'entity_type': 'DATE', 'value': '2024-06-15'},
         # IP_ADDRESS
         {'entity_type': 'IP_ADDRESS', 'value': '192.168.1.1'},
-        {'entity_type': 'IP_ADDRESS', 'value': '10.0.0.255'}
+        {'entity_type': 'IP_ADDRESS', 'value': '10.0.0.255'},
+        # INDIAN_STATUTORY_IDS
+        {'entity_type': 'CIN', 'value': 'U28129PN1979PLC141032'},
+        {'entity_type': 'PAN', 'value': 'ABCDE1234F'},
+        {'entity_type': 'GSTIN', 'value': '27ABCDE1234F1Z5'},
+        {'entity_type': 'AADHAAR', 'value': '1234 5678 9012'}
     ]
 
     return test_text.strip(), ground_truth
@@ -172,9 +178,13 @@ def print_results(metrics: Dict[str, Dict[str, float]]):
         'CREDIT_CARD': 'Credit Cards',
         'DATE': 'Dates',
         'IP_ADDRESS': 'IP Addresses',
+        'CIN': 'CINs',
+        'PAN': 'PANs',
+        'GSTIN': 'GSTINs',
+        'AADHAAR': 'Aadhaars',
     }
     
-    for category in ['FULL_NAME', 'EMAIL', 'PHONE', 'COMPANY', 'ADDRESS', 'SSN', 'CREDIT_CARD', 'DATE', 'IP_ADDRESS']:
+    for category in ['FULL_NAME', 'EMAIL', 'PHONE', 'COMPANY', 'ADDRESS', 'SSN', 'CREDIT_CARD', 'DATE', 'IP_ADDRESS', 'CIN', 'PAN', 'GSTIN', 'AADHAAR']:
         if category not in metrics:
             continue
         stats = metrics[category]

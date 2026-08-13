@@ -35,7 +35,11 @@ class DetectionEngine:
                 r'|\b\d{1,2}-(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-\d{2,4}\b'
                 r'|\b\d{4}-\d{2}-\d{2}\b',
                 re.IGNORECASE
-            )
+            ),
+            'CIN': re.compile(r'\b[UL]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}\b', re.IGNORECASE),
+            'PAN': re.compile(r'\b[A-Z]{5}\d{4}[A-Z]\b', re.IGNORECASE),
+            'GSTIN': re.compile(r'\b\d{2}[A-Z]{5}\d{4}[A-Z][0-9A-Z]{3}\b', re.IGNORECASE),
+            'AADHAAR': re.compile(r'\b\d{4}\s\d{4}\s\d{4}\b')
         }
 
     def _count_digits(self, text: str) -> int:

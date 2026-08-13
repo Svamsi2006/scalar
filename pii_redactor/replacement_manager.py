@@ -45,6 +45,10 @@ class ReplacementManager:
             'CREDIT_CARD': self._generate_credit_card,
             'DATE': self._generate_date,
             'IP_ADDRESS': self._generate_ip,
+            'CIN': self._generate_cin,
+            'PAN': self._generate_pan,
+            'GSTIN': self._generate_gstin,
+            'AADHAAR': self._generate_aadhaar,
         }
 
     def _normalize(self, value: str) -> str:
@@ -181,6 +185,20 @@ class ReplacementManager:
 
     def _generate_ip(self, original: str) -> str:
         return self.faker.ipv4()
+
+    def _generate_cin(self, original: str) -> str:
+        prefix = self.faker.random_element(["U", "L"])
+        rest = self.faker.bothify(text="#####??####???######").upper()
+        return f"{prefix}{rest}"
+
+    def _generate_pan(self, original: str) -> str:
+        return self.faker.bothify(text="?????####?").upper()
+
+    def _generate_gstin(self, original: str) -> str:
+        return self.faker.bothify(text="##?????####?#?#").upper()
+
+    def _generate_aadhaar(self, original: str) -> str:
+        return self.faker.bothify(text="#### #### ####")
 
     def get_report(self) -> Dict[str, Dict[str, str]]:
         """
