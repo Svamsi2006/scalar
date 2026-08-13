@@ -1,0 +1,10 @@
+# Ignore python virtual environments and cache
+__pycache__/
+*.pyc
+.venv/
+env/
+.streamlit/
+
+# Ignore sensitive raw documents and translation maps
+*Red Herring Prospectus.docx
+map.json

@@ -83,6 +83,6 @@ The extremely high accuracy reflects the fact that PII entities are sparse relat
 ## Consistency Validation
 
 The `ReplacementManager` was separately tested to confirm:
-- **Same input → same output:** "Rajesh Kumar Sharma" mapped to "Allison Hill" consistently across multiple calls. ✓
-- **Different inputs → different outputs:** "Priya Anand Mehta" mapped to "Noah Rhodes" (distinct from above). ✓
-- **Normalization:** Whitespace and case variations in the same name resolve to the same fake. ✓
+- **Same input → same output:** "Rajesh Kumar Sharma" mapped to "[NAME_1]" consistently across multiple calls. ✓
+- **Different inputs → different outputs:** "Priya Anand Mehta" mapped to "[NAME_2]" (distinct from above). ✓
+- **Normalization:** Whitespace and case variations in the same name resolve to the same replacement. ✓

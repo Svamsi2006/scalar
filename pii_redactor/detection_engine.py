@@ -9,8 +9,14 @@ class DetectionEngine:
         try:
             self.nlp = spacy.load('en_core_web_sm')
         except OSError:
-            print("Warning: spacy model 'en_core_web_sm' not found. Please install it using: python -m spacy download en_core_web_sm")
-            self.nlp = None
+            print("spaCy model 'en_core_web_sm' not found. Attempting to download...")
+            try:
+                from spacy.cli import download
+                download('en_core_web_sm')
+                self.nlp = spacy.load('en_core_web_sm')
+            except Exception as download_err:
+                print(f"Error downloading spaCy model: {download_err}")
+                self.nlp = None
             
         if self.nlp:
             self.nlp.max_length = 2_000_000
