@@ -412,14 +412,92 @@ if "active_filesize_kb" not in st.session_state:
     st.session_state["active_filesize_kb"] = 0.0
 
 # ==============================================================================
-# 5. READ PARAMETERS FROM STATE (COLLAPSIBLE CONFIG DEFINED AT BOTTOM)
+# 5. SIDEBAR CONFIGURATOR (COOL UI)
 # ==============================================================================
-selected_mode_label = st.session_state.get("selected_mode_label", list(REDACTION_MODES.keys())[0])
-selected_mode = REDACTION_MODES[selected_mode_label]
+with st.sidebar:
+    st.markdown("## ⚙️ Advanced Settings")
+    st.caption("Engine parameter tuning & health diagnostics.")
+    st.divider()
 
-seed_value = st.session_state.get("seed_value", 42)
-selected_locale_label = st.session_state.get("selected_locale_label", list(LOCALE_OPTIONS.keys())[1])
-selected_locale = LOCALE_OPTIONS[selected_locale_label]
+    # Visual Redaction Style
+    st.markdown("#### 🎨 Visual Redaction Style")
+    selected_mode_label = st.selectbox(
+        "Choose Redaction Mode:",
+        options=list(REDACTION_MODES.keys()),
+        index=0,
+        help="Determines the visual representation of redacted PII."
+    )
+    selected_mode = REDACTION_MODES[selected_mode_label]
+
+    # Optional seed & locale if synthetic mode is selected
+    if selected_mode == "synthetic":
+        seed_value = st.slider(
+            "Faker Random Seed",
+            min_value=0,
+            max_value=10000,
+            value=42,
+            step=1,
+            help="Controls Faker's seed for reproducible synthetic values."
+        )
+        selected_locale_label = st.selectbox(
+            "Synthetic Locale Style",
+            options=list(LOCALE_OPTIONS.keys()),
+            index=1,
+            help="Determines regional styling for synthetic names and addresses."
+        )
+        selected_locale = LOCALE_OPTIONS[selected_locale_label]
+    else:
+        seed_value = 42
+        selected_locale = "en_US"
+        st.info("💡 Real Redaction Active: No random or fictitious data will be generated.")
+
+    # Style Preview Container
+    preview = STYLE_PREVIEW_MAP[selected_mode]
+    st.markdown(f"""
+    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.9rem; margin-top: 0.5rem; margin-bottom: 0.5rem;">
+        <span style="font-weight: 700; color: #1e293b; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">✨ Redaction Preview</span>
+        <p style="font-size: 0.775rem; color: #64748b; margin-top: 0.2rem; margin-bottom: 0.6rem; line-height: 1.4;">
+            {preview['desc']}
+        </p>
+        <div style="font-size: 0.775rem; color: #475569; margin-bottom: 0.4rem; line-height: 1.4;">
+            <strong>Original:</strong><br/>
+            <span style="font-family: monospace; color: #ef4444; background-color: #fef2f2; padding: 0.1rem 0.25rem; border-radius: 4px; display: block; margin-top: 0.15rem; word-break: break-all;">{preview['original']}</span>
+        </div>
+        <div style="font-size: 0.775rem; color: #475569; line-height: 1.4;">
+            <strong>Anonymized:</strong><br/>
+            <span style="font-family: monospace; color: #22c55e; background-color: #f0fdf4; padding: 0.1rem 0.25rem; border-radius: 4px; display: block; margin-top: 0.15rem; word-break: break-all;">{preview['anon']}</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # Engine Health & Diagnostics
+    st.markdown("#### 🤖 Engine Diagnostics")
+    try:
+        nlp_test = load_spacy_model()
+        st.markdown("""
+        <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 0.6rem 0.8rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; color: #166534; font-size: 0.8rem;">
+            <span style="height: 10px; width: 10px; background-color: #22c55e; border-radius: 50%; display: inline-block;"></span>
+            <strong>spaCy NER Model Active:</strong> en_core_web_sm loaded
+        </div>
+        """, unsafe_allow_html=True)
+    except Exception:
+        st.markdown("""
+        <div style="background-color: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 0.6rem 0.8rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; color: #92400e; font-size: 0.8rem;">
+            <span style="height: 10px; width: 10px; background-color: #f59e0b; border-radius: 50%; display: inline-block;"></span>
+            <strong>spaCy Model Unavailable:</strong> Regex-only mode
+        </div>
+        """, unsafe_allow_html=True)
+
+    with st.expander("ℹ️ Architecture Highlights", expanded=False):
+        st.markdown("""
+        - **Real Document Parsing:** Ingests any Word document, scanning body paragraphs, tables, headers, and footers.
+        - **XML Run Splitting:** Splits XML `<w:r>` runs at boundary offsets without corrupting styles.
+        - **In-Memory Streams:** Zero disk footprint processing via `io.BytesIO`.
+        """)
+        
+    st.caption("Enterprise PII Redaction Suite • v1.2.0")
 
 # ==============================================================================
 # 6. SINGLE-PAGE CONTINUOUS FLOW WORKSPACE
@@ -778,83 +856,6 @@ if st.session_state["redaction_results"] is not None:
             mime="application/json",
             use_container_width=True
         )
-
-# ------------------------------------------------------------------------------
-# SECTION 5: ⚙️ Configuration & Diagnostics (Advanced Settings)
-# ------------------------------------------------------------------------------
-st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
-st.divider()
-
-with st.expander("⚙️ Advanced Configuration & Engine Diagnostics", expanded=False):
-    st.markdown("### ⚙️ Redaction Configuration")
-    st.caption("Configure redaction style, category exclusions, and inspect engine health.")
-    
-    col_c1, col_c2 = st.columns(2)
-    
-    with col_c1:
-        st.markdown("#### 🎨 Visual Redaction Style")
-        selected_mode_label = st.selectbox(
-            "Choose Redaction Mode:",
-            options=list(REDACTION_MODES.keys()),
-            key="selected_mode_label",
-            help="Determines the visual representation of redacted PII."
-        )
-        selected_mode = REDACTION_MODES[selected_mode_label]
-        
-        # Optional seed & locale if synthetic mode is selected
-        if selected_mode == "synthetic":
-            st.slider(
-                "Faker Random Seed",
-                min_value=0,
-                max_value=10000,
-                value=42,
-                step=1,
-                key="seed_value",
-                help="Controls Faker's seed for reproducible synthetic values."
-            )
-            st.selectbox(
-                "Synthetic Locale Style",
-                options=list(LOCALE_OPTIONS.keys()),
-                index=1,
-                key="selected_locale_label",
-                help="Determines regional styling for synthetic names and addresses."
-            )
-            
-        # Style Preview Container
-        preview = STYLE_PREVIEW_MAP[selected_mode]
-        st.markdown(f"""
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.9rem; margin-top: 0.5rem; margin-bottom: 0.5rem;">
-            <span style="font-weight: 700; color: #1e293b; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">✨ Redaction Preview</span>
-            <p style="font-size: 0.775rem; color: #64748b; margin-top: 0.2rem; margin-bottom: 0.6rem; line-height: 1.4;">
-                {preview['desc']}
-            </p>
-            <div style="font-size: 0.775rem; color: #475569; margin-bottom: 0.4rem; line-height: 1.4;">
-                <strong>Original:</strong><br/>
-                <span style="font-family: monospace; color: #ef4444; background-color: #fef2f2; padding: 0.1rem 0.25rem; border-radius: 4px; display: block; margin-top: 0.15rem; word-break: break-all;">{preview['original']}</span>
-            </div>
-            <div style="font-size: 0.775rem; color: #475569; line-height: 1.4;">
-                <strong>Anonymized:</strong><br/>
-                <span style="font-family: monospace; color: #22c55e; background-color: #f0fdf4; padding: 0.1rem 0.25rem; border-radius: 4px; display: block; margin-top: 0.15rem; word-break: break-all;">{preview['anon']}</span>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    with col_c2:
-        # (Category exclusions removed for clean interface)
-        
-        st.markdown("#### 🔍 Engine Diagnostics")
-        try:
-            nlp_test = load_spacy_model()
-            st.success("✅ spaCy NER Model: `en_core_web_sm` loaded", icon="🤖")
-        except Exception:
-            st.warning("⚠️ spaCy Model unavailable. Using Regex-only mode.", icon="⚡")
-            
-        with st.expander("ℹ️ Architecture Highlights"):
-            st.markdown("""
-            - **Real Document Parsing:** Ingests any Word document, scanning body paragraphs, tables, headers, and footers.
-            - **XML Run Splitting:** Splits XML `<w:r>` runs at boundary offsets without corrupting styles.
-            - **In-Memory Streams:** Zero disk footprint processing via `io.BytesIO`.
-            """)
 
 # Footer
 st.markdown("<div style='height: 2.5rem;'></div>", unsafe_allow_html=True)
