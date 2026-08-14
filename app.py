@@ -414,16 +414,8 @@ if "active_filesize_kb" not in st.session_state:
 # ==============================================================================
 # 5. READ PARAMETERS FROM STATE (COLLAPSIBLE CONFIG DEFINED AT BOTTOM)
 # ==============================================================================
-exclusion_options = {
-    f"{meta['icon']} {meta['label']}": key 
-    for key, meta in CATEGORY_DEFINITIONS.items()
-}
-
 selected_mode_label = st.session_state.get("selected_mode_label", list(REDACTION_MODES.keys())[0])
 selected_mode = REDACTION_MODES[selected_mode_label]
-
-excluded_labels = st.session_state.get("excluded_labels", [])
-excluded_keys: Set[str] = {exclusion_options[label] for label in excluded_labels if label in exclusion_options}
 
 seed_value = st.session_state.get("seed_value", 42)
 selected_locale_label = st.session_state.get("selected_locale_label", list(LOCALE_OPTIONS.keys())[1])
@@ -504,7 +496,7 @@ if st.session_state["active_file_bytes"] is not None:
                 
                 # 2. Instantiate core components cleanly
                 parser = DocumentParser()
-                detector = DetectionEngine(exclude_types=excluded_keys)
+                detector = DetectionEngine()
                 replacement_mgr = ReplacementManager(mode=selected_mode, seed=seed_value, locale=selected_locale)
                 
                 # 3. Load DOCX directly from in-memory stream
@@ -848,14 +840,7 @@ with st.expander("⚙️ Advanced Configuration & Engine Diagnostics", expanded=
         """, unsafe_allow_html=True)
         
     with col_c2:
-        st.markdown("#### 🚫 Category Exclusions")
-        st.multiselect(
-            "Select PII categories to KEEP (skip redaction):",
-            options=list(exclusion_options.keys()),
-            default=[],
-            key="excluded_labels",
-            help="Selected categories will remain untouched in the output document."
-        )
+        # (Category exclusions removed for clean interface)
         
         st.markdown("#### 🔍 Engine Diagnostics")
         try:
