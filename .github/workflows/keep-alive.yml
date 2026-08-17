@@ -5,6 +5,8 @@ on:
 jobs:
   ping:
     runs-on: ubuntu-latest
+    env:
+      STREAMLIT_APP_URL: ${{ vars.STREAMLIT_APP_URL || 'https://scalarproject.streamlit.app' }}
     steps:
       - name: Ping Streamlit App
-        run: curl -s --head https://scalarproject.streamlit.app || true
+        run: curl --silent --show-error --head --max-time 30 "$STREAMLIT_APP_URL" > /dev/null
