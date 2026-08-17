@@ -5,6 +5,14 @@ on:
 jobs:
   ping:
     runs-on: ubuntu-latest
+    env:
+      STREAMLIT_APP_URL: ${{ vars.STREAMLIT_APP_URL }}
     steps:
       - name: Ping Streamlit App
-        run: curl -sL https://your-app-name.streamlit.app > /dev/null
+        run: |
+          if [ -z "${STREAMLIT_APP_URL}" ]; then
+            echo "STREAMLIT_APP_URL is not configured. Skipping keep-alive ping."
+            exit 0
+          fi
+
+          curl --fail --silent --show-error --location "${STREAMLIT_APP_URL}" > /dev/null
